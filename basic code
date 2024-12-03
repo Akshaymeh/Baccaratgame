@@ -1,0 +1,162 @@
+import java.util.*;
+
+class Card {
+    private String rank;
+    private String suit;
+
+    // Constructor
+    public Card(String rank, String suit) {
+        this.rank = rank;
+        this.suit = suit;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public String getSuit() {
+        return suit;
+    }
+
+    @Override
+    public String toString() {
+        return rank + " of " + suit;
+    }
+}
+
+class Deck {
+    private List<Card> cards;
+
+    // Constructor
+    public Deck() {
+        cards = new ArrayList<>();
+        String[] ranks = { "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
+        String[] suits = { "Hearts", "Diamonds", "Clubs", "Spades" };
+
+        // Create a deck of 52 cards
+        for (String suit : suits) {
+            for (String rank : ranks) {
+                cards.add(new Card(rank, suit));
+            }
+        }
+        shuffleDeck();
+    }
+
+    // Shuffle the deck
+    public void shuffleDeck() {
+        Collections.shuffle(cards);
+    }
+
+    // Draw a card from the deck
+    public Card drawCard() {
+        return cards.remove(0);
+    }
+}
+
+class Player {
+    private List<Card> hand;
+
+    // Constructor
+    public Player() {
+        hand = new ArrayList<>();
+    }
+
+    // Add a card to the player's hand
+    public void addCard(Card card) {
+        hand.add(card);
+    }
+
+    // Get the hand's value (mod 10)
+    public int getHandValue() {
+        int totalValue = 0;
+        for (Card card : hand) {
+            String rank = card.getRank();
+            if (rank.equals("J") || rank.equals("Q") || rank.equals("K")) {
+                totalValue += 0; // Face cards are worth 0
+            } else if (rank.equals("A")) {
+                totalValue += 1; // Ace is worth 1
+            } else {
+                totalValue += Integer.parseInt(rank); // Numeric cards are worth their value
+            }
+        }
+        return totalValue % 10; // Baccarat hand value is mod 10
+    }
+
+    // Clear the player's hand for the next round
+    public void clearHand() {
+        hand.clear();
+    }
+
+    // Print the player's hand
+    public void printHand() {
+        for (Card card : hand) {
+            System.out.println(card);
+        }
+    }
+}
+
+class BaccaratGame {
+    private Deck deck;
+    private Player player;
+    private Player banker;
+    private Scanner scanner;
+
+    // Constructor
+    public BaccaratGame() {
+        deck = new Deck();
+        player = new Player();
+        banker = new Player();
+        scanner = new Scanner(System.in);
+    }
+
+    // Start a new round
+    public void startNewRound() {
+        // Clear hands
+        player.clearHand();
+        banker.clearHand();
+
+        // Draw two cards for each player
+        player.addCard(deck.drawCard());
+        banker.addCard(deck.drawCard());
+        player.addCard(deck.drawCard());
+        banker.addCard(deck.drawCard());
+
+        // Print hands
+        System.out.println("\nPlayer's Hand:");
+        player.printHand();
+        System.out.println("\nBanker's Hand:");
+        banker.printHand();
+
+        // Determine the winner
+        int playerValue = player.getHandValue();
+        int bankerValue = banker.getHandValue();
+        System.out.println("\nPlayer's Hand Value: " + playerValue);
+        System.out.println("Banker's Hand Value: " + bankerValue);
+
+        if (playerValue > bankerValue) {
+            System.out.println("\nPlayer wins this round!");
+        } else if (bankerValue > playerValue) {
+            System.out.println("\nBanker wins this round!");
+        } else {
+            System.out.println("\nIt's a tie!");
+        }
+    }
+
+    // Main method to play the game
+    public static void main(String[] args) {
+        BaccaratGame game = new BaccaratGame();
+        boolean playAgain = true;
+
+        // Loop for playing multiple rounds
+        while (playAgain) {
+            game.startNewRound();
+            System.out.print("\nDo you want to play another round? (yes/no): ");
+            String answer = game.scanner.nextLine();
+            if (!answer.equalsIgnoreCase("yes")) {
+                playAgain = false;
+            }
+        }
+
+        System.out.println("Thanks for playing Baccarat!");
+    }
+}
